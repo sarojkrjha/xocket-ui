@@ -37,6 +37,7 @@ import AttorneyDetailsPage from '@/pages/AttorneyDetailsPage'
 import ClientDetailsPage from '@/pages/ClientDetailsPage'
 import DebtorsPage from '@/pages/DebtorsPage'
 import DebtorDetailsPage from '@/pages/DebtorDetailsPage'
+import ClaimDetailsPage from '@/pages/ClaimDetailsPage'
  
 
 export function AppRouter() {
@@ -151,6 +152,10 @@ export function AppRouter() {
           <Route
             path="/claims"
             element={<ClaimsPage />}
+          />
+          <Route
+            path="/claims/:id"
+            element={<ClaimDetailsPage  />}
           />
 
           <Route

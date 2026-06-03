@@ -1,15 +1,10 @@
 export interface Claim {
   id: number
-
-  claimNumber: string
-
-  caseNumber: string
-
-  creditor: string
-
-  amount: number
-
+  accountId: number
+  bankruptcyCaseId: number
+  claimAmount: number
+  barDate: string | null
+  filedOnUtc: string | null
   status: string
-
-  filedDate: string
+  courtClaimNumber: string | null
 }
