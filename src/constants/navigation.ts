@@ -68,7 +68,12 @@ export const navigation: NavigationItem[] = [
         title: 'Cases',
         path: '/cases',
         icon: Briefcase,
+      }, {
+        title: 'Debtors',
+        path: '/debtors',
+        icon: Briefcase,
       },
+      
       {
         title: 'Courts',
         path: '/courts',

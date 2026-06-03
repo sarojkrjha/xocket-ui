@@ -17,19 +17,18 @@ import { TableActions } from '@/components/shared/TableActions'
 import { TableToolbar } from '@/components/shared/TableToolbar'
 
 import { PrimaryButton } from '@/components/ui/PrimaryButton'
-import { StatusBadge } from '@/components/ui/StatusBadge'
 
-import { getClients } from '@/services/clientService'
+import { getDebtors } from '@/services/debtorService'
 
-import type { Client } from '@/types/client'
+import type { Debtor } from '@/types/debtor'
 import type { TableColumn } from '@/types/table'
 
-export default function ClientsPage() {
+export default function DebtorsPage() {
   const navigate =
     useNavigate()
 
-  const [clients, setClients] =
-    useState<Client[]>([])
+  const [debtors, setDebtors] =
+    useState<Debtor[]>([])
 
   const [loading, setLoading] =
     useState(false)
@@ -46,20 +45,20 @@ export default function ClientsPage() {
   const pageSize = 20
 
   useEffect(() => {
-    loadClients()
+    loadDebtors()
   }, [page])
 
-  async function loadClients() {
+  async function loadDebtors() {
     try {
       setLoading(true)
 
       const result =
-        await getClients(
+        await getDebtors(
           page,
           pageSize,
         )
 
-      setClients(
+      setDebtors(
         result.items,
       )
 
@@ -71,67 +70,54 @@ export default function ClientsPage() {
     }
   }
 
-  const filteredClients =
+  const filtered =
     useMemo(() => {
-      if (!search.trim())
-        return clients
+      if (!search)
+        return debtors
 
-      return clients.filter(
+      return debtors.filter(
         (x) =>
-          x.clientName
-            .toLowerCase()
+          x.fullName
+            ?.toLowerCase()
             .includes(
               search.toLowerCase(),
             ),
       )
     }, [
-      clients,
+      debtors,
       search,
     ])
 
-  const columns: TableColumn<Client>[] =
+  const columns: TableColumn<Debtor>[] =
     [
       {
-        key: 'id',
+        key: 'bkDebtorID',
         title: 'Id',
       },
 
       {
-        key: 'clientCode',
-        title: 'Code',
+        key: 'fullName',
+        title: 'Name',
         sortable: true,
       },
 
       {
-        key: 'clientName',
-        title: 'Client Name',
-        sortable: true,
+        key: 'last4SSN',
+        title: 'Last 4 SSN',
       },
 
       {
-        key: 'isActive',
-        title: 'Status',
-
-        render: (
-          value,
-        ) => (
-          <StatusBadge
-            status={
-              value
-                ? 'success'
-                : 'danger'
-            }
-            text={
-              value
-                ? 'Active'
-                : 'Inactive'
-            }
-          />
-        ),
+        key: 'bkDebtorTypeID',
+        title: 'Type',
       },
 
       {
-        key: 'id',
+        key: 'bkID',
+        title: 'Case Id',
+      },
+
+      {
+        key: 'bkDebtorID',
         title: 'Actions',
 
         render: (
@@ -141,7 +127,7 @@ export default function ClientsPage() {
           <TableActions
             onView={() =>
               navigate(
-                `/clients/${row.id}`,
+                `/debtors/${row.bkDebtorID}`,
               )
             }
           />
@@ -152,12 +138,12 @@ export default function ClientsPage() {
   return (
     <>
       <PageHeader
-        title="Clients"
-        description="Manage clients."
+        title="Debtors"
+        description="Manage bankruptcy debtors."
         actions={
           <PrimaryButton>
             <Plus size={18} />
-            New Client
+            New Debtor
           </PrimaryButton>
         }
       />
@@ -169,7 +155,7 @@ export default function ClientsPage() {
 
       <AppTable
         columns={columns}
-        data={filteredClients}
+        data={filtered}
         loading={loading}
       />
 

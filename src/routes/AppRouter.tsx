@@ -34,6 +34,9 @@ import BankruptcyCaseDetailsPage from '@/pages/BankruptcyCaseDetailsPage'
 import CourtDetailsPage from '@/pages/ContactDetailsPage'
 import TrusteeDetailsPage from '@/pages/TrusteeDetailsPage'
 import AttorneyDetailsPage from '@/pages/AttorneyDetailsPage'
+import ClientDetailsPage from '@/pages/ClientDetailsPage'
+import DebtorsPage from '@/pages/DebtorsPage'
+import DebtorDetailsPage from '@/pages/DebtorDetailsPage'
  
 
 export function AppRouter() {
@@ -73,6 +76,10 @@ export function AppRouter() {
           />
         
           <Route
+            path="/clients/:id"
+            element={<ClientDetailsPage />}
+          />
+          <Route
             path="/cases"
             element={<CasesPage />}
           />
@@ -82,6 +89,15 @@ export function AppRouter() {
             element={
               <BankruptcyCaseDetailsPage />
             }
+          />
+          <Route
+            path="/debtors"
+            element={<DebtorsPage />}
+          />
+
+          <Route
+            path="/debtors/:id"
+            element={<DebtorDetailsPage />}
           />
           <Route
             path="/courts"
