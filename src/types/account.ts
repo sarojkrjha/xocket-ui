@@ -1,11 +1,9 @@
 export interface Account {
   id: number
-
-  accountName: string
-
+  clientId: number
   accountNumber: string
-
+  originalBalance: number
+  currentBalance: number
   status: string
-
-  createdOn: string
+  isBankruptcyActive: boolean
 }

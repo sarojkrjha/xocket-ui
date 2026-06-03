@@ -1,69 +1,119 @@
-import { useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
-import { Plus } from 'lucide-react'
+import {
+  Plus,
+} from 'lucide-react'
 
-import { PageHeader } from '@/components/shared/PageHeader'
-import { AppTable } from '@/components/shared/AppTable'
-import { TableToolbar } from '@/components/shared/TableToolbar'
-import { Pagination } from '@/components/shared/Pagination'
+import {
+  PageHeader,
+} from '@/components/shared/PageHeader'
 
-import { StatusBadge } from '@/components/ui/StatusBadge'
-import { PrimaryButton } from '@/components/ui/PrimaryButton'
-import { TableActions } from '@/components/shared/TableActions'
-import type { Account } from '@/types/account'
-import type { TableColumn } from '@/types/table'
+import {
+  AppTable,
+} from '@/components/shared/AppTable'
+
+import {
+  TableToolbar,
+} from '@/components/shared/TableToolbar'
+
+import {
+  Pagination,
+} from '@/components/shared/Pagination'
+
+import {
+  StatusBadge,
+} from '@/components/ui/StatusBadge'
+
+import {
+  PrimaryButton,
+} from '@/components/ui/PrimaryButton'
+
+import {
+  TableActions,
+} from '@/components/shared/TableActions'
+
+import {
+  getAccounts,
+} from '@/services/accountService'
+
+import type {
+  Account,
+} from '@/types/account'
+
+import type {
+  TableColumn,
+} from '@/types/table'
 
 export default function AccountsPage() {
+  const [accounts, setAccounts] =
+    useState<Account[]>([])
+
+  const [loading, setLoading] =
+    useState(false)
+
   const [search, setSearch] =
     useState('')
 
   const [page, setPage] =
     useState(1)
 
-  const accounts: Account[] = [
-    {
-      id: 1,
-      accountName:
-        'Capital One',
-      accountNumber:
-        'ACC-1001',
-      status: 'Active',
-      createdOn:
-        '2026-05-01',
-    },
+  const [totalCount, setTotalCount] =
+    useState(0)
 
-    {
-      id: 2,
-      accountName:
-        'Chase Bank',
-      accountNumber:
-        'ACC-1002',
-      status: 'Pending',
-      createdOn:
-        '2026-05-03',
-    },
+  const pageSize = 20
 
-    {
-      id: 3,
-      accountName:
-        'Bank of America',
-      accountNumber:
-        'ACC-1003',
-      status: 'Inactive',
-      createdOn:
-        '2026-05-04',
-    },
-  ]
+  useEffect(() => {
+    loadAccounts()
+  }, [page])
 
-  const filtered =
-    accounts.filter(
-      (x) =>
-        x.accountName
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ),
-    )
+  async function loadAccounts() {
+    try {
+      setLoading(true)
+
+      const response =
+        await getAccounts(
+          page,
+          pageSize,
+        )
+
+      setAccounts(
+        response.items,
+      )
+
+      setTotalCount(
+        response.totalCount,
+      )
+    } catch (error) {
+      console.error(
+        'Failed to load accounts',
+        error,
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredAccounts =
+    useMemo(() => {
+      if (!search.trim())
+        return accounts
+
+      return accounts.filter(
+        (account) =>
+          account.accountNumber
+            .toLowerCase()
+            .includes(
+              search.toLowerCase(),
+            ),
+      )
+    }, [
+      accounts,
+      search,
+    ])
 
   const columns: TableColumn<Account>[] =
     [
@@ -73,17 +123,47 @@ export default function AccountsPage() {
       },
 
       {
-        key: 'accountName',
-        title:
-          'Account Name',
-          sortable: true,
-      },
-
-      {
         key: 'accountNumber',
         title:
           'Account Number',
-          sortable: true,
+        sortable: true,
+      },
+
+      {
+        key: 'clientId',
+        title:
+          'Client Id',
+        sortable: true,
+      },
+
+      {
+        key:
+          'originalBalance',
+        title:
+          'Original Balance',
+        sortable: true,
+
+        render: (
+          value,
+        ) =>
+          Number(
+            value,
+          ).toLocaleString(),
+      },
+
+      {
+        key:
+          'currentBalance',
+        title:
+          'Current Balance',
+        sortable: true,
+
+        render: (
+          value,
+        ) =>
+          Number(
+            value,
+          ).toLocaleString(),
       },
 
       {
@@ -98,34 +178,50 @@ export default function AccountsPage() {
               value ===
               'Active'
                 ? 'success'
-                : value ===
-                  'Pending'
-                ? 'warning'
                 : 'danger'
             }
+            text={String(
+              value,
+            )}
+          />
+        ),
+      },
+
+      {
+        key:
+          'isBankruptcyActive',
+        title:
+          'Bankruptcy',
+
+        render: (
+          value,
+        ) => (
+          <StatusBadge
+            status={
+              value
+                ? 'warning'
+                : 'success'
+            }
             text={
-              String(
-                value,
-              )
+              value
+                ? 'Active'
+                : 'None'
             }
           />
         ),
       },
 
       {
-        key: 'createdOn',
-        title:
-          'Created On',
-          sortable: true,
-      },
-      {
         key: 'id',
         title: 'Actions',
 
-        render: () => (
+        render: (
+          _,
+          row,
+        ) => (
           <TableActions />
         ),
-      }
+      },
     ]
 
   return (
@@ -155,13 +251,22 @@ export default function AccountsPage() {
           columns
         }
         data={
-          filtered
+          filteredAccounts
+        }
+        loading={
+          loading
         }
       />
 
       <Pagination
         page={page}
-        totalPages={5}
+        totalPages={Math.max(
+          1,
+          Math.ceil(
+            totalCount /
+              pageSize,
+          ),
+        )}
         onChange={
           setPage
         }
