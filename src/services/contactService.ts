@@ -1,16 +1,16 @@
 import { apiClient } from './apiClient'
 
-import type { Account } from '@/types/account'
+import type { Contact } from '@/types/contact'
 import type { PagedResponse } from '@/types/api'
 
-export async function getAccounts(
+export async function getContacts(
   page: number,
   pageSize: number,
 ) {
   const response =
     await apiClient.get<
-      PagedResponse<Account>
-    >('/api/accounts', {
+      PagedResponse<Contact>
+    >('/api/contacts', {
       params: {
         page,
         pageSize,
@@ -20,12 +20,12 @@ export async function getAccounts(
   return response.data
 }
 
-export async function getAccount(
+export async function getContact(
   id: number,
 ) {
   const response =
-    await apiClient.get<Account>(
-      `/api/accounts/${id}`,
+    await apiClient.get<Contact>(
+      `/api/contacts/${id}`,
     )
 
   return response.data

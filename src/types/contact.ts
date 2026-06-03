@@ -1,15 +1,13 @@
 export interface Contact {
   id: number
-
-  accountName: string
-
   firstName: string
-
   lastName: string
-
+  companyName: string
   email: string
-
-  phoneNumber: string
-
-  isPrimary: boolean
+  phone: string
+  address1: string
+  city: string
+  state: string
+  zipCode: string
+  isActive: boolean
 }

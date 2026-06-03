@@ -3,7 +3,9 @@ import {
   useMemo,
   useState,
 } from 'react'
-
+import {
+  useNavigate,
+} from 'react-router-dom'
 import {
   Plus,
 } from 'lucide-react'
@@ -51,7 +53,8 @@ import type {
 export default function AccountsPage() {
   const [accounts, setAccounts] =
     useState<Account[]>([])
-
+  const navigate =
+    useNavigate()
   const [loading, setLoading] =
     useState(false)
 
@@ -215,13 +218,16 @@ export default function AccountsPage() {
         key: 'id',
         title: 'Actions',
 
-        render: (
-          _,
-          row,
-        ) => (
-          <TableActions />
+        render: (_, row) => (
+          <TableActions
+            onView={() =>
+              navigate(
+                `/accounts/${row.id}`,
+              )
+            }
+          />
         ),
-      },
+      }
     ]
 
   return (

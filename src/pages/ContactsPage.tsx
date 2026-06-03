@@ -1,95 +1,121 @@
- 
-import { useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { useNavigate } from 'react-router-dom'
+import {
+  Plus,
+} from 'lucide-react'
 
-import { Plus } from 'lucide-react'
+import {
+  PageHeader,
+} from '@/components/shared/PageHeader'
 
-import { PageHeader } from '@/components/shared/PageHeader'
-import { TableToolbar } from '@/components/shared/TableToolbar'
-import { Pagination } from '@/components/shared/Pagination'
-import { AppTable } from '@/components/shared/AppTable'
+import {
+  TableToolbar,
+} from '@/components/shared/TableToolbar'
 
-import { PrimaryButton } from '@/components/ui/PrimaryButton'
-import { StatusBadge } from '@/components/ui/StatusBadge'
+import {
+  AppTable,
+} from '@/components/shared/AppTable'
 
-import { TableActions } from '@/components/shared/TableActions'
+import {
+  Pagination,
+} from '@/components/shared/Pagination'
 
-import type { Contact } from '@/types/contact'
-import type { TableColumn } from '@/types/table'
+import {
+  TableActions,
+} from '@/components/shared/TableActions'
+
+import {
+  PrimaryButton,
+} from '@/components/ui/PrimaryButton'
+
+import {
+  StatusBadge,
+} from '@/components/ui/StatusBadge'
+
+import {
+  getContacts,
+} from '@/services/contactService'
+
+import type {
+  Contact,
+} from '@/types/contact'
+
+import type {
+  TableColumn,
+} from '@/types/table'
 
 export default function ContactsPage() {
-  const [search, setSearch] =
-    useState('')
+  const [contacts, setContacts] =
+    useState<Contact[]>([])
 
+  const [loading, setLoading] =
+    useState(false)
+  const navigate =
+    useNavigate()
   const [page, setPage] =
     useState(1)
 
-  const contacts: Contact[] = [
-    {
-      id: 1,
-      accountName:
-        'Capital One',
-      firstName: 'John',
-      lastName: 'Smith',
-      email:
-        'john.smith@capitalone.com',
-      phoneNumber:
-        '(555) 123-4567',
-      isPrimary: true,
-    },
+  const [search, setSearch] =
+    useState('')
 
-    {
-      id: 2,
-      accountName:
-        'Chase Bank',
-      firstName: 'Mary',
-      lastName: 'Johnson',
-      email:
-        'mary.johnson@chase.com',
-      phoneNumber:
-        '(555) 987-6543',
-      isPrimary: false,
-    },
+  const [totalCount, setTotalCount] =
+    useState(0)
 
-    {
-      id: 3,
-      accountName:
-        'Bank Of America',
-      firstName: 'Robert',
-      lastName: 'Brown',
-      email:
-        'robert.brown@boa.com',
-      phoneNumber:
-        '(555) 456-7890',
-      isPrimary: true,
-    },
-  ]
+  const pageSize = 20
 
-  const filtered =
-    contacts.filter(
-      (c) =>
-        c.firstName
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ) ||
-        c.lastName
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ) ||
-        c.email
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ),
-    )
+  useEffect(() => {
+    loadContacts()
+  }, [page])
+
+  async function loadContacts() {
+    try {
+      setLoading(true)
+
+      const result =
+        await getContacts(
+          page,
+          pageSize,
+        )
+
+      setContacts(
+        result.items,
+      )
+
+      setTotalCount(
+        result.totalCount,
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredContacts =
+    useMemo(() => {
+      if (!search.trim())
+        return contacts
+
+      return contacts.filter(
+        (x) =>
+          `${x.firstName} ${x.lastName}`
+            .toLowerCase()
+            .includes(
+              search.toLowerCase(),
+            ),
+      )
+    }, [
+      contacts,
+      search,
+    ])
 
   const columns: TableColumn<Contact>[] =
     [
       {
-        key: 'accountName',
-        title: 'Account',
-        sortable: true,
+        key: 'id',
+        title: 'Id',
       },
 
       {
@@ -105,18 +131,23 @@ export default function ContactsPage() {
       },
 
       {
+        key: 'companyName',
+        title: 'Company',
+      },
+
+      {
         key: 'email',
         title: 'Email',
       },
 
       {
-        key: 'phoneNumber',
+        key: 'phone',
         title: 'Phone',
       },
 
       {
-        key: 'isPrimary',
-        title: 'Primary',
+        key: 'isActive',
+        title: 'Status',
 
         render: (
           value,
@@ -125,12 +156,12 @@ export default function ContactsPage() {
             status={
               value
                 ? 'success'
-                : 'default'
+                : 'danger'
             }
             text={
               value
-                ? 'Yes'
-                : 'No'
+                ? 'Active'
+                : 'Inactive'
             }
           />
         ),
@@ -140,10 +171,16 @@ export default function ContactsPage() {
         key: 'id',
         title: 'Actions',
 
-        render: () => (
-          <TableActions />
+        render: (_, row) => (
+          <TableActions
+            onView={() =>
+              navigate(
+                `/contacts/${row.id}`,
+              )
+            }
+          />
         ),
-      },
+      }
     ]
 
   return (
@@ -153,7 +190,9 @@ export default function ContactsPage() {
         description="Manage account contacts."
         actions={
           <PrimaryButton>
-            <Plus size={18} />
+            <Plus
+              size={18}
+            />
             New Contact
           </PrimaryButton>
         }
@@ -161,18 +200,35 @@ export default function ContactsPage() {
 
       <TableToolbar
         search={search}
-        onSearch={setSearch}
+        onSearch={
+          setSearch
+        }
       />
 
       <AppTable
-        columns={columns}
-        data={filtered}
+        columns={
+          columns
+        }
+        data={
+          filteredContacts
+        }
+        loading={
+          loading
+        }
       />
 
       <Pagination
         page={page}
-        totalPages={5}
-        onChange={setPage}
+        totalPages={Math.max(
+          1,
+          Math.ceil(
+            totalCount /
+              pageSize,
+          ),
+        )}
+        onChange={
+          setPage
+        }
       />
     </>
   )

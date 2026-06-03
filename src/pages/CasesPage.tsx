@@ -1,119 +1,134 @@
-import { useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
-import { Plus } from 'lucide-react'
+import {
+  Plus,
+} from 'lucide-react'
 
-import { PageHeader } from '@/components/shared/PageHeader'
-import { TableToolbar } from '@/components/shared/TableToolbar'
-import { AppTable } from '@/components/shared/AppTable'
-import { Pagination } from '@/components/shared/Pagination'
+import {
+  useNavigate,
+} from 'react-router-dom'
 
-import { StatusBadge } from '@/components/ui/StatusBadge'
-import { PrimaryButton } from '@/components/ui/PrimaryButton'
+import {
+  PageHeader,
+} from '@/components/shared/PageHeader'
 
-import type { BankruptcyCase } from '@/types/bankruptcyCase'
-import type { TableColumn } from '@/types/table'
+import {
+  AppTable,
+} from '@/components/shared/AppTable'
 
-import { TableActions } from '@/components/shared/TableActions'
+import {
+  Pagination,
+} from '@/components/shared/Pagination'
 
-import { getCaseStatusBadge } from '@/utils/caseStatus'
+import {
+  TableActions,
+} from '@/components/shared/TableActions'
 
-export default function CasesPage() {
-  const [search, setSearch] =
-    useState('')
+import {
+  TableToolbar,
+} from '@/components/shared/TableToolbar'
+
+import {
+  PrimaryButton,
+} from '@/components/ui/PrimaryButton'
+
+import {
+  getBankruptcyCases,
+} from '@/services/bankruptcyCaseService'
+
+import type {
+  BankruptcyCase,
+} from '@/types/bankruptcyCase'
+
+import type {
+  TableColumn,
+} from '@/types/table'
+
+export default function BankruptcyCasesPage() {
+  const navigate =
+    useNavigate()
+
+  const [cases, setCases] =
+    useState<
+      BankruptcyCase[]
+    >([])
+
+  const [loading, setLoading] =
+    useState(false)
 
   const [page, setPage] =
     useState(1)
 
-  const cases: BankruptcyCase[] =
-    [
-      {
-        id: 1,
-        bankruptcyCaseNumber:
-          'BK-2026-1001',
+  const [search, setSearch] =
+    useState('')
 
-        debtorName:
-          'John Smith',
+  const [totalCount, setTotalCount] =
+    useState(0)
 
-        chapter: 'Chapter 7',
+  const pageSize = 20
 
-        bankruptcyCaseStatus:
-          'Open',
+  useEffect(() => {
+    loadCases()
+  }, [page])
 
-        filingDate:
-          '2026-05-01',
+  async function loadCases() {
+    try {
+      setLoading(true)
 
-        court:
-          'Delaware',
-      },
+      const result =
+        await getBankruptcyCases(
+          page,
+          pageSize,
+        )
 
-      {
-        id: 2,
-        bankruptcyCaseNumber:
-          'BK-2026-1002',
+      setCases(
+        result.items,
+      )
 
-        debtorName:
-          'Mary Johnson',
+      setTotalCount(
+        result.totalCount,
+      )
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-        chapter: 'Chapter 11',
+  const filteredCases =
+    useMemo(() => {
+      if (!search.trim())
+        return cases
 
-        bankruptcyCaseStatus:
-          'Pending',
-
-        filingDate:
-          '2026-05-02',
-
-        court:
-          'Texas',
-      },
-
-      {
-        id: 3,
-        bankruptcyCaseNumber:
-          'BK-2026-1003',
-
-        debtorName:
-          'ABC Holdings LLC',
-
-        chapter: 'Chapter 13',
-
-        bankruptcyCaseStatus:
-          'Dismissed',
-
-        filingDate:
-          '2026-05-04',
-
-        court:
-          'California',
-      },
-    ]
-
-  const filtered =
-    cases.filter(
-      (c) =>
-        c.bankruptcyCaseNumber
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ) ||
-        c.debtorName
-          .toLowerCase()
-          .includes(
-            search.toLowerCase(),
-          ),
-    )
+      return cases.filter(
+        (x) =>
+          x.bankruptcyCaseNumber
+            .toLowerCase()
+            .includes(
+              search.toLowerCase(),
+            ),
+      )
+    }, [
+      cases,
+      search,
+    ])
 
   const columns: TableColumn<BankruptcyCase>[] =
     [
       {
-        key: 'bankruptcyCaseNumber',
-        title:
-          'Case Number',
-        sortable: true,
+        key: 'id',
+        title: 'Id',
       },
 
       {
-        key: 'debtorName',
-        title: 'Debtor',
+        key:
+          'bankruptcyCaseNumber',
+        title:
+          'Case Number',
         sortable: true,
       },
 
@@ -123,28 +138,7 @@ export default function CasesPage() {
       },
 
       {
-        key:
-          'bankruptcyCaseStatus',
-        title: 'Status',
-
-        render: (
-          value,
-        ) => (
-          <StatusBadge
-            status={getCaseStatusBadge(
-              String(
-                value,
-              ),
-            )}
-            text={String(
-              value,
-            )}
-          />
-        ),
-      },
-
-      {
-        key: 'court',
+        key: 'courtName',
         title: 'Court',
       },
 
@@ -159,8 +153,17 @@ export default function CasesPage() {
         key: 'id',
         title: 'Actions',
 
-        render: () => (
-          <TableActions />
+        render: (
+          _,
+          row,
+        ) => (
+          <TableActions
+            onView={() =>
+              navigate(
+                `/bankruptcy-cases/${row.id}`,
+              )
+            }
+          />
         ),
       },
     ]
@@ -169,7 +172,7 @@ export default function CasesPage() {
     <>
       <PageHeader
         title="Bankruptcy Cases"
-        description="Manage bankruptcy cases and monitor status."
+        description="Manage bankruptcy cases."
         actions={
           <PrimaryButton>
             <Plus
@@ -192,13 +195,22 @@ export default function CasesPage() {
           columns
         }
         data={
-          filtered
+          filteredCases
+        }
+        loading={
+          loading
         }
       />
 
       <Pagination
         page={page}
-        totalPages={10}
+        totalPages={Math.max(
+          1,
+          Math.ceil(
+            totalCount /
+              pageSize,
+          ),
+        )}
         onChange={
           setPage
         }

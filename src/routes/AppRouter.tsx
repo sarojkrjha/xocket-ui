@@ -28,6 +28,12 @@ import ScrubbingPage from '@/pages/ScrubbingPage'
 import ClaimDocumentsPage from '@/pages/ClaimDocumentsPage'
 import ClaimPaymentsPage from '@/pages/ClaimPaymentsPage'
 import TimelineEventsPage from '@/pages/TimelineEventsPage'
+import AccountDetailsPage from '@/pages/AccountDetailsPage'
+import ContactDetailsPage from '@/pages/ContactDetailsPage'
+import BankruptcyCaseDetailsPage from '@/pages/BankruptcyCaseDetailsPage'
+import CourtDetailsPage from '@/pages/ContactDetailsPage'
+import TrusteeDetailsPage from '@/pages/TrusteeDetailsPage'
+import AttorneyDetailsPage from '@/pages/AttorneyDetailsPage'
  
 
 export function AppRouter() {
@@ -46,11 +52,21 @@ export function AppRouter() {
             path="/accounts"
             element={<AccountsPage />}
           />
-
+          <Route
+            path="/accounts/:id"
+            element={<AccountDetailsPage />}
+          />
           <Route
             path="/contacts"
             element={<ContactsPage />}
           />
+          <Route
+            path="/contacts/:id"
+            element={
+              <ContactDetailsPage />
+            }
+          />
+
           <Route
             path="/clients"
             element={<ClientsPage />}
@@ -60,19 +76,38 @@ export function AppRouter() {
             path="/cases"
             element={<CasesPage />}
           />
+
+          <Route
+            path="/bankruptcy-cases/:id"
+            element={
+              <BankruptcyCaseDetailsPage />
+            }
+          />
           <Route
             path="/courts"
             element={<CourtsPage />}
           />
           
           <Route
+            path="/courts/:id"
+            element={<CourtDetailsPage />}
+          />
+          <Route
             path="/trustees"
             element={<TrusteesPage />}
+          />
+          <Route
+            path="/trustees/:id"
+            element={<TrusteeDetailsPage />}
           />
           
           <Route
             path="/attorneys"
             element={<AttorneysPage />}
+          />
+          <Route
+            path="/attorneys/:id"
+            element={<AttorneyDetailsPage />}
           />
           <Route
             path="/matching"

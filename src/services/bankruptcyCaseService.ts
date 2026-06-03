@@ -1,16 +1,16 @@
 import { apiClient } from './apiClient'
 
-import type { Account } from '@/types/account'
+import type { BankruptcyCase } from '@/types/bankruptcyCase'
 import type { PagedResponse } from '@/types/api'
 
-export async function getAccounts(
+export async function getBankruptcyCases(
   page: number,
   pageSize: number,
 ) {
   const response =
     await apiClient.get<
-      PagedResponse<Account>
-    >('/api/accounts', {
+      PagedResponse<BankruptcyCase>
+    >('/api/bankruptcy-cases', {
       params: {
         page,
         pageSize,
@@ -20,12 +20,12 @@ export async function getAccounts(
   return response.data
 }
 
-export async function getAccount(
+export async function getBankruptcyCase(
   id: number,
 ) {
   const response =
-    await apiClient.get<Account>(
-      `/api/accounts/${id}`,
+    await apiClient.get<BankruptcyCase>(
+      `/api/bankruptcy-cases/${id}`,
     )
 
   return response.data
